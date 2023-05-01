@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS colive;
 DO
 $do$
 BEGIN
