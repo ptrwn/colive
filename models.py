@@ -21,9 +21,14 @@ class UserFlat(SQLModel, table=True):
     flat: "Flats" = Relationship(back_populates="user_links")
 
 
-class Users(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+
+
+
+class UsersBase(SQLModel):
     name: str
+
+class Users(UsersBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
     email: Optional[str] =  Field(default=None, unique=True)
     birth_date: Optional[date] 
     flat_links: Optional[List["UserFlat"]] = Relationship(back_populates="user")
@@ -38,14 +43,36 @@ class Users(SQLModel, table=True):
                         ),
                     back_populates="assignee")
 
+class UserInFlat(UsersBase):
+    id: int
 
-class Flats(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+
+
+
+
+class FlatsBase(SQLModel):
     name: str
     address: Optional[str] =  Field(default=None, unique=True)
-    rent: Optional[int]
-    tasks: Optional[List["Tasks"]] = Relationship(back_populates="flat")
+    rent: Optional[float]
+
+class Flats(FlatsBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
     user_links: Optional[List["UserFlat"]] = Relationship(back_populates="flat")
+    tasks: Optional[List["Tasks"]] = Relationship(back_populates="flat")
+
+class FlatsGet(FlatsBase):
+    # users: Optional[List["UserInFlat"]]
+    # tasks: Optional[List["TaskInFlat"]]
+    users: Optional[List["Users"]]
+    tasks: Optional[List["Tasks"]]
+
+class FlatsGetAll(FlatsBase):
+    id: int
+    users: Optional[List["UserInFlat"]]
+    tasks: Optional[List["TaskInFlat"]]
+
+
+
 
 
 class TaskStatus(Enum):
@@ -60,21 +87,32 @@ class TaskPriority(Enum):
     high: str = "High"
 
 
-class Tasks(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+class TasksBase(SQLModel):
     name: str
     status: TaskStatus = Field(default=TaskStatus.new)
     deadline: Optional[datetime]
     priority: Optional[TaskPriority] = Field(default=TaskPriority.normal)
     is_expense: Optional[bool] 
     total: Optional[float]
+
+
+class Tasks(TasksBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
     creator_id: int = Field(default=None, foreign_key="users.id")
+    assignee_id: Optional[int] = Field(default=None, foreign_key="users.id")
     creator: Users = Relationship(
                     sa_relationship_kwargs=dict(primaryjoin="Tasks.creator_id==Users.id",),
                     back_populates="created_tasks")
-    assignee_id: Optional[int] = Field(default=None, foreign_key="users.id")
     assignee: Optional[Users] = Relationship(
                     sa_relationship_kwargs=dict(primaryjoin="Tasks.assignee_id==Users.id",),
                     back_populates="assigned_tasks")
     flat_id: int = Field(default=None, foreign_key="flats.id")
     flat: Flats = Relationship(back_populates="tasks")
+
+class TaskInFlat(TasksBase):
+    id: int
+    creator_id: int
+    assignee_id: Optional[int]
+
+
+

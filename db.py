@@ -1,6 +1,6 @@
 from models import Users, Tasks, Flats, UserFlat
 
-from sqlmodel import create_engine, Session, select
+from sqlmodel import create_engine, Session, select, SQLModel
 
 engine = create_engine("postgresql+psycopg2://colive:123qwe@localhost/colive", echo=True)
 session = Session(engine)
@@ -42,8 +42,9 @@ def fill_in_db():
         session.commit()
 
 
-# SQLModel.metadata.create_all(engine)
-# fill_in_db()
+if __name__ == '__main__':
+    SQLModel.metadata.create_all(engine)
+    fill_in_db()
 
 
 # def select_flats():

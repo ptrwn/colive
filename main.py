@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Response
-from models import Flats, Users
+from models import Flats, FlatsGet, Users
 from db import session
 from sqlmodel import select
+from typing import Optional, Union
 
 app = FastAPI()
 
@@ -10,10 +11,11 @@ app = FastAPI()
 async def teapot():
     return {"message": "I'm a teapot"}
 
-# TODO: add a separate model for flat - to define response format
-# @app.get("/flats/{flat_id}", response_model=Flats)
-@app.get("/flats/{flat_id}")
-def read_item(flat_id: int, response: Response):
+
+@app.get("/flats/{flat_id}", response_model=Flats)
+# @app.get("/flats/{flat_id}")
+# def read_item(flat_id: int, response: Response) -> Optional[FlatsGet]:
+def read_item(flat_id: int):
     flat = session.exec(select(Flats).where(Flats.id==flat_id)).one_or_none()
     if flat:
 
@@ -43,8 +45,8 @@ def read_item(flat_id: int, response: Response):
 
 
         return flat_details
-    response.status_code = 204
-    return 
+    # response.status_code = 204
+    # return 
 
 
 @app.get("/flats")
