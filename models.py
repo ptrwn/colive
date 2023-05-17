@@ -21,9 +21,6 @@ class UserFlat(SQLModel, table=True):
     flat: "Flats" = Relationship(back_populates="user_links")
 
 
-
-
-
 class UsersBase(SQLModel):
     name: str
 
@@ -61,17 +58,15 @@ class Flats(FlatsBase, table=True):
     tasks: Optional[List["Tasks"]] = Relationship(back_populates="flat")
 
 class FlatsGet(FlatsBase):
-    # users: Optional[List["UserInFlat"]]
-    # tasks: Optional[List["TaskInFlat"]]
-    users: Optional[List["Users"]]
-    tasks: Optional[List["Tasks"]]
+    users: Optional[List["UserInFlat"]]
+    tasks: Optional[List["TaskInFlat"]]
+
+
 
 class FlatsGetAll(FlatsBase):
     id: int
     users: Optional[List["UserInFlat"]]
     tasks: Optional[List["TaskInFlat"]]
-
-
 
 
 
@@ -116,3 +111,5 @@ class TaskInFlat(TasksBase):
 
 
 
+FlatsGet.update_forward_refs(UserInFlat=UserInFlat) 
+FlatsGet.update_forward_refs(TaskInFlat=TaskInFlat) 
