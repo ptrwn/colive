@@ -1,14 +1,14 @@
 import uvicorn
-from fastapi import FastAPI, Response, status
-from models import Flats, FlatsGet, Users
+from fastapi import FastAPI, Response, status, HTTPException
+from models import Flats, FlatsGet, Users, UserInFlat
 from db import session
 from sqlmodel import select
-from typing import Optional
+from typing import Optional, Any
 
 app = FastAPI()
 
 responses = {
-    204: {"description": "No such item"},
+    404: {"description": "No such item"},
     200: {"description": "OK"}
 }
 
@@ -19,37 +19,23 @@ async def teapot():
 
 
 @app.get("/flats/{flat_id}", response_model=FlatsGet, responses={**responses})
-def read_item(flat_id: int) -> Optional[FlatsGet]:
-    flat = session.exec(select(Flats).where(Flats.id==flat_id)).one_or_none()
+def read_item(flat_id: Any) -> Optional[FlatsGet]:
+    try:
+        int(flat_id)
+    except:
+        return Response(status_code=status.HTTP_404_NOT_FOUND) 
+
+    flat = session.get(Flats, flat_id)
     if flat:
-
-        flat_details = dict()
-        flat_details["name"] = flat.name
-        if flat.address:
-            flat_details["address"] = flat.address
-
-
+        res_flat = {k: v for k, v in flat.__dict__.items() if not k.startswith('_')}
+        res_flat["tasks"] = flat.tasks
         flats_users = flat.user_links
-
         if flats_users:
-
-            users = []
-
-            for ul in flats_users:
-                user_details = dict()
-                user = session.exec(select(Users).where(Users.id==ul.user_id)).one_or_none()
-                user_details["id"] = user.id
-                user_details["name"] = user.name
-                user_details["role"] = ul.user_role.value
-                users.append(user_details)  
-
-            flat_details["users"] = users     
-
-        #flats_tasks = flat.task_links
-
-
-        return flat_details
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+            users = [UserInFlat(id=ul.user.id, name=ul.user.name) for ul in flats_users]
+            res_flat["users"] = users
+        return res_flat
+    
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
 @app.get("/flats")

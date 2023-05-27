@@ -46,15 +46,3 @@ if __name__ == '__main__':
     SQLModel.metadata.create_all(engine)
     fill_in_db()
 
-
-# def select_flats():
-#     with session:
-#         statement = select(Flats)
-#         results = session.exec(statement)
-#         for flat in results:
-#             print(flat)
-#             print(flat.user_links)
-#             print("==============")
-
-
-# select_flats()

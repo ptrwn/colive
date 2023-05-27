@@ -58,16 +58,9 @@ class Flats(FlatsBase, table=True):
     tasks: Optional[List["Tasks"]] = Relationship(back_populates="flat")
 
 class FlatsGet(FlatsBase):
+    id:  int
     users: Optional[List["UserInFlat"]]
     tasks: Optional[List["TaskInFlat"]]
-
-
-
-class FlatsGetAll(FlatsBase):
-    id: int
-    users: Optional[List["UserInFlat"]]
-    tasks: Optional[List["TaskInFlat"]]
-
 
 
 class TaskStatus(Enum):
@@ -106,9 +99,8 @@ class Tasks(TasksBase, table=True):
 
 class TaskInFlat(TasksBase):
     id: int
-    creator_id: int
-    assignee_id: Optional[int]
-
+    creator: UserInFlat
+    assignee: Optional[UserInFlat]
 
 
 FlatsGet.update_forward_refs(UserInFlat=UserInFlat) 
